@@ -32,10 +32,14 @@ namespace Google.Apis.Discovery
         /// <summary> The version of this service </summary>
         string Version { get; }
 
-        /// <summary>
-        /// Path where the service resides
-        /// </summary>
+        /// <summary>Path where the service resides.</summary>
         Uri BaseUri { get; }
+
+        /// <summary>The canonical name of this service.</summary>
+        string CanonicalName { get; }
+
+        /// <summary> BasePath of the resource. </summary>
+        string BasePath { get; }
 
         /// <summary> 
         /// The Rpc URI of this service. 

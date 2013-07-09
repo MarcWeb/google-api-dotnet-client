@@ -18,7 +18,9 @@ using System;
 using System.Collections.Generic;
 
 using Google.Apis.Discovery;
+using Google.Apis.Http;
 using Google.Apis.Services;
+using Google.Apis.Util;
 
 namespace Google.Apis.Testing
 {
@@ -31,35 +33,34 @@ namespace Google.Apis.Testing
 
         private string _baseUri;
         public override string BaseUri { get { return _baseUri; } }
+        public override string BasePath { get { return string.Empty; } }
 
         private IList<string> _features = new List<string> { "rest", "rpc", "json", "atom" };
         public override IList<string> Features { get { return _features; } }
         public void SetFeatures(IList<string> features) { _features = features; }
 
-        public override IDictionary<string, IParameter> ServiceParameters { get { return null; } }
-
-        public override Google.Apis.Requests.IRequest CreateRequest(Google.Apis.Requests.IClientServiceRequest request)
+        private IDictionary<string, IParameter> _serviceParameters = new Dictionary<string, IParameter>();
+        public override IDictionary<string, IParameter> ServiceParameters
         {
-            throw new NotImplementedException();
+            get { return _serviceParameters; }
         }
 
-        public MockClientService()
-            : this(new Initializer(), @"https://testexample.google.com")
-        {
-        }
-        public MockClientService(Initializer initializer)
-            : this(initializer, @"https://testexample.google.com")
-        {
-        }
-        public MockClientService(string baseUri)
+        public MockClientService(string baseUri = @"https://testexample.google.com")
             : this(new Initializer(), baseUri)
         {
         }
-        public MockClientService(Initializer initializer, string baseUri)
+
+        public MockClientService(Initializer initializer, string baseUri = @"https://testexample.google.com")
             : base(initializer)
         {
             _baseUri = baseUri;
         }
 
+        protected override BackOffHandler CreateBackOffHandler()
+        {
+            // we create a mock back-off handler here which doesn't make calls to thread sleep. It just add the waited
+            // time span into a list.
+            return new MockBackOffHandler(new ExponentialBackOff());
+        }
     }
 }

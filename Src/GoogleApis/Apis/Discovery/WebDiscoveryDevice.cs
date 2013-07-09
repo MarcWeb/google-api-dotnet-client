@@ -30,7 +30,8 @@ namespace Google.Apis.Discovery
             TimeoutInSeconds = 30;
         }
 
-        public WebDiscoveryDevice(Uri discoveryUri) : this()
+        public WebDiscoveryDevice(Uri discoveryUri)
+            : this()
         {
             DiscoveryUri = discoveryUri;
         }
@@ -58,15 +59,14 @@ namespace Google.Apis.Discovery
         /// </returns>
         public Stream Fetch()
         {
-            HttpWebRequest request = (HttpWebRequest) WebRequest.Create(DiscoveryUri);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(DiscoveryUri);
 
-            // The timeout property is only supported on regular .NET.
-#if !SILVERLIGHT
-            request.Timeout = TimeoutInSeconds * 1000;
-#endif
+            // TODO(peleyal): add back when splitting Google.Apis to discovery and runtime dlls. This class should be
+            // in the discovery dll. (timeout property is only supported on regular .NET).
+            //request.Timeout = TimeoutInSeconds * 1000;
 
             IAsyncResult async = request.BeginGetResponse(null, null);
-            response = (HttpWebResponse) request.EndGetResponse(async);
+            response = (HttpWebResponse)request.EndGetResponse(async);
             Stream responseData = response.GetResponseStream();
 
             return responseData;

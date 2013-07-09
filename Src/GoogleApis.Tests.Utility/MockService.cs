@@ -52,10 +52,12 @@ namespace Google.Apis.Testing
         #region IService Members
 
         public string Name { get; set; }
+        public string CanonicalName { get; set; }
         public string Title { get; set; }
         public IDictionary<string, IResource> Resources { get; set; }
         public string Version { get; set; }
         public Uri BaseUri { get; set; }
+        public string BasePath { get; set; }
         public Uri RpcUri { get; set; }
         public bool GZipEnabled { get; set; }
         public DiscoveryVersion DiscoveryVersion { get; set; }
@@ -75,31 +77,6 @@ namespace Google.Apis.Testing
         public string Protocol { get; private set; }
         public string Description { get; private set; }
         public IList<string> Features { get; set; }
-
-        public IRequest CreateRequest(string resource, string methodName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string SerializeRequest(object obj)
-        {
-            throw new NotImplementedException();
-        }
-
-        public RequestError DeserializeError(IResponse input)
-        {
-            throw new NotImplementedException();
-        }
-
-        public T DeserializeResponse<T>(IResponse input)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool HasFeature(Features feature)
-        {
-            throw new NotImplementedException();
-        }
 
         #endregion
 

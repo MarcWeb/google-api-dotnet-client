@@ -28,16 +28,18 @@ namespace Google.Apis.Tools.CodeGen.Decorator.ResourceDecorator.RequestDecorator
 {
     /// <summary>
     /// Generates the standard constructors of an upload request.
-    ///  1. A constructor taking the service and mandatory parameters and initalizing the base class
-    ///     with the baseUri, path and HTTP method for this upload request.
+    /// A resumable upload constructor takes the service and mandatory parameters and initializes the base class with 
+    /// the service, path and HTTP method for this upload request.
     /// Example:
-    /// <c>public InsertRequest(BaseService service, int requiredParameter, ..) : base(service.BaseUri, "path", "POST") {..}</c>
+    /// <c>
+    /// public InsertRequest(IClientService service, int requiredParameter, ..) 
+    ///     : base(service, "path", "POST") {..}
+    /// </c>
     /// </summary>
     public class UploadConstructorDecorator : BaseRequestConstructorDecorator
     {
-        private const string AuthenticatorName = "Authenticator";
         private const string ServiceName = "service";
-        private const string BaseUriName = "BaseUri";
+        private const string BasePathName = "BasePath";
 
         private const string StreamParameterName = "stream";
         private const string ContentTypeParameterName = "contentType";
@@ -75,11 +77,23 @@ namespace Google.Apis.Tools.CodeGen.Decorator.ResourceDecorator.RequestDecorator
             var serviceArg = new CodeParameterDeclarationExpression(typeof(IClientService), ServiceName);
             constructor.Parameters.Add(serviceArg);
 
-            // : base(service, "path", "HTTPMETHOD")
+            // : base(service, string.Format("/{0}{1}{2}", "upload", service.BasePath, "RESOURCE_PATH"), 
+            // "HTTP_METHOD", ... (required parameters)
+
+            // service
             constructor.BaseConstructorArgs.Add(
-                new CodePropertyReferenceExpression(
-                    new CodeVariableReferenceExpression(ServiceName), BaseUriName));
-            constructor.BaseConstructorArgs.Add(new CodePrimitiveExpression(request.MediaUpload.Simple.Path));
+                new CodeVariableReferenceExpression(ServiceName));
+
+            // string.Format("/{0}{1}{2}", "upload", service.BasePath, "RESOURCE_PATH")
+            var path = new CodeMethodInvokeExpression(new CodeMethodReferenceExpression(
+                new CodeTypeReferenceExpression(typeof(string)), "Format"),
+                    new CodePrimitiveExpression("/{0}{1}{2}"),
+                    new CodePrimitiveExpression("upload"),
+                    new CodePropertyReferenceExpression(
+                        new CodeVariableReferenceExpression(ServiceName), BasePathName),
+                    new CodePrimitiveExpression(request.RestPath));
+            constructor.BaseConstructorArgs.Add(path);
+            // "HTTP_METHOD"
             constructor.BaseConstructorArgs.Add(new CodePrimitiveExpression(request.HttpMethod));
 
             // Add all required arguments to the constructor.
@@ -89,7 +103,6 @@ namespace Google.Apis.Tools.CodeGen.Decorator.ResourceDecorator.RequestDecorator
             constructor.BaseConstructorArgs.Add(new CodeVariableReferenceExpression(StreamParameterName));
             constructor.BaseConstructorArgs.Add(new CodeVariableReferenceExpression(ContentTypeParameterName));
 
-            AddAuthorizationAssignment(constructor);
             AddRequestParameters(resourceClass, request, constructor, addOptionalParameters);
 
             constructor.Parameters.Add(new CodeParameterDeclarationExpression(
@@ -98,20 +111,6 @@ namespace Google.Apis.Tools.CodeGen.Decorator.ResourceDecorator.RequestDecorator
                 new CodeTypeReference(typeof(System.String)), ContentTypeParameterName));
 
             return constructor;
-        }
-
-        /// <summary>
-        /// Adds this.Authenticator = service.Authenticator to <paramref name="constructor"/>
-        /// </summary>
-        /// <param name="constructor">The resumable upload constructor.</param>
-        private void AddAuthorizationAssignment(CodeConstructor constructor)
-        {
-            constructor.Statements.Add(
-                new CodeAssignStatement(
-                    new CodePropertyReferenceExpression(
-                        new CodeThisReferenceExpression(), AuthenticatorName),
-                    new CodePropertyReferenceExpression(
-                        new CodeVariableReferenceExpression(ServiceName), AuthenticatorName)));
         }
     }
 }

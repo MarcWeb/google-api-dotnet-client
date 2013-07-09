@@ -88,6 +88,7 @@ namespace Google.Apis.Tools.CodeGen
                             new RequestConstructorDecorator(typeProvider) { CreateOptionalConstructor = false },
                             new ServiceRequestFieldDecorator(),
                             new InitRequestParametersDecorator(),
+                            new MediaDownloaderDecorator(),
                         }).AsReadOnly();
         }
 
@@ -115,7 +116,6 @@ namespace Google.Apis.Tools.CodeGen
                      new StandardConstructServiceDecorator(),
                      new EasyConstructServiceDecorator(),
                      new VersionInformationServiceDecorator(),
-                     new CreateRequestMethodServiceDecorator(),
                      new BaseClientServiceAbstractPropertiesDecorator(),
                      new ScopeEnumDecorator(),
                      new InitServiceParametersDecorator(),
@@ -256,7 +256,6 @@ namespace Google.Apis.Tools.CodeGen
         internal CodeNamespace GenerateClientCode()
         {
             var clientNamespace = CreateNamespace(codeClientNamespace);
-            AddClientUsings(clientNamespace);
 
             ResourceContainerGenerator resourceContainerGenerator =
                 new ResourceContainerGenerator(resourceContainerDecorators);
@@ -346,15 +345,6 @@ namespace Google.Apis.Tools.CodeGen
         private CodeNamespace CreateNamespace(string nameSpace)
         {
             return new CodeNamespace(nameSpace);
-        }
-
-        private void AddClientUsings(CodeNamespace codeNamespace)
-        {
-            codeNamespace.Imports.Add(new CodeNamespaceImport("System"));
-            codeNamespace.Imports.Add(new CodeNamespaceImport("System.IO"));
-            codeNamespace.Imports.Add(new CodeNamespaceImport("System.Collections.Generic"));
-            codeNamespace.Imports.Add(new CodeNamespaceImport("Google.Apis"));
-            codeNamespace.Imports.Add(new CodeNamespaceImport("Google.Apis.Discovery"));
         }
 
         private static string DataNamespace(string clientNamespace)
